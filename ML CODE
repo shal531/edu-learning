@@ -1,0 +1,36 @@
+# Import necessary libraries
+from surprise import Dataset, Reader, SVD
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Load your dataset (replace 'your_dataset.csv' with your actual dataset file)
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_file('your_dataset.csv', reader)
+
+# Split the data into training and testing sets
+trainset, testset = train_test_split(data, test_size=0.2)
+
+# Define and train the model (SVD algorithm in this example)
+model = SVD()
+model.fit(trainset)
+
+# Make predictions on the test set
+predictions = model.test(testset)
+
+# Evaluate the model's accuracy
+accuracy.rmse(predictions)
+
+# Now, let's make personalized recommendations for a specific user (replace 'user_id' with the desired user ID)
+user_id = '123'
+user_recommendations = []
+for item_id in range(1, 100):  # Assuming you have 100 items in your dataset
+    predicted_rating = model.predict(user_id, item_id).est
+    user_recommendations.append((item_id, predicted_rating))
+
+# Sort the recommendations by predicted rating in descending order
+user_recommendations.sort(key=lambda x: x[1], reverse=True)
+
+# Print the top N recommendations
+top_n = 10
+for i, (item_id, predicted_rating) in enumerate(user_recommendations[:top_n]):
+    print(f"Rank {i+1}: Item ID {item_id}, Predicted Rating: {predicted_rating}")
